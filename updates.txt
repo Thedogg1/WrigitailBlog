@@ -1,0 +1,246 @@
+
+import React from 'react';
+import { client } from '@/sanity/lib/client';
+import { groq } from 'next-sanity';
+import Hero from '@/components/Hero';
+import FeaturedArticles from '@/components/FeaturedArticles';
+import About from '@/components/About';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+
+// Use your existing query structure
+const query = groq`
+    *[_type =="post"]{
+    ...,
+      author->, 
+} | order(_publishedAt desc)`;
+
+const HomePage = async () => {
+  // Fetch posts from Sanity - maintaining the existing data flow
+  const posts = await client.fetch(query);
+
+  return (
+    <>
+      <Header />
+      <main>
+        <Hero />
+        <FeaturedArticles posts={posts} />
+        <About />
+      </main>
+      <Footer />
+    </>
+  );
+};
+
+export default HomePage;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// FILE: components/Hero.tsx - done
+import React from 'react';
+
+const Hero = () => {
+  return (
+    <div className="bg-[#1B3143] text-white py-16 px-8">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-4xl md:text-5xl font-bold mb-3">
+          Empowering Financial Advisors with AI Insights
+        </h1>
+        <p className="text-lg mb-8">
+          Navigating the intersection of technology and finance.
+        </p>
+        <button className="bg-white text-[#1B3143] px-5 py-2 rounded font-medium hover:bg-gray-100 transition-colors">
+          Subscribe for Weekly Updates
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default Hero;
+
+// FILE: components/FeaturedArticles.tsx 
+
+
+import React from 'react';
+import Image from 'next/image';
+import { urlForImage } from '@/sanity/lib/image';
+import Route from './Route';
+
+type Props = {
+  posts: Post[];
+};
+
+const FeaturedArticles = ({ posts }: Props) => {
+  // Use only the first 3 posts for featured section
+  const featuredPosts = posts.slice(0, 3);
+  
+  return (
+    <div className="max-w-6xl mx-auto px-5 my-12">
+      <h2 className="text-xl font-bold mb-6">Featured Articles</h2>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {featuredPosts.map((post) => (
+          <Route route={`/blog/${post.slug.current}`} key={post._id}>
+            <div className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+              <div className="relative w-full h-48">
+                <Image
+                  fill
+                  src={urlForImage(post.mainImage)}
+                  alt={post.title}
+                  className="object-cover"
+                />
+                {/* Tag using publication date instead of categories */}
+                <span className="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">
+                  {new Date(post.publishedAt).toLocaleDateString('en-US', {month: 'short', year: 'numeric'})}
+                </span>
+              </div>
+              <div className="p-4">
+                <h3 className="font-bold text-lg mb-2">{post.title}</h3>
+                <p className="text-gray-600 text-sm line-clamp-3">{post.description}</p>
+              </div>
+            </div>
+          </Route>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default FeaturedArticles;
+
+// FILE: components/About.tsx - done
+import React from 'react';
+import Image from 'next/image';
+
+const About = () => {
+  return (
+    <div className="max-w-6xl mx-auto px-5 my-12 flex flex-col md:flex-row items-center md:items-start gap-8">
+      <div className="w-36 h-36 relative flex-shrink-0">
+        <Image
+          src="/api/placeholder/150/150" // Replace with your actual profile image
+          alt="Profile photo"
+          className="rounded-full object-cover"
+          fill
+        />
+      </div>
+      <div>
+        <h2 className="text-xl font-bold mb-3">About</h2>
+        <p className="text-gray-700">
+          Navigating the intersection of technology and finance, documenting my progress through Microsoft certifications, offering insights and guidance to financial professionals.
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default About;
+
+// FILE: app/page.tsx - Main homepage component -  done
+import React from 'react';
+import { client } from '@/sanity/lib/client';
+import { groq } from 'next-sanity';
+import Hero from '@/components/Hero';
+import FeaturedArticles from '@/components/FeaturedArticles';
+import About from '@/components/About';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+
+// Maintain the same query to ensure data consistency
+const query = groq`
+    *[_type =="post"]{
+    ...,
+      author->, 
+      categories[]->
+} | order(_publishedAt desc)`;
+
+const HomePage = async () => {
+  // Fetch posts from Sanity - maintaining the existing data flow
+  const posts = await client.fetch(query);
+
+  return (
+    <>
+      <Header />
+      <main>
+        <Hero />
+        <FeaturedArticles posts={posts} />
+        <About />
+      </main>
+      <Footer />
+    </>
+  );
+};
+
+export default HomePage;
+
+// FILE: components/Header.tsx - Updated Header - done
+import React from 'react';
+import Logo from '../public/assets/m.png';
+import Image from 'next/image';
+import Link from 'next/link';
+
+const Header = () => {
+  return (
+    <nav className='flex justify-between bg-white text-[#1B3143] py-4 px-5 md:px-10 lg:px-20 font-medium shadow-sm items-center'>
+      <Link href='/' className='flex items-center'>
+        <span>
+          <Image src={Logo} alt='Logo' className='h-8 w-8 mx-2' />
+        </span>
+        <span className='hidden md:inline-block font-semibold'>Financial Advisor Insights</span>
+      </Link>
+      <div className="flex items-center gap-6">
+        <Link href="/blog" className="hover:text-[#E7493F] transition-colors">Blog</Link>
+        <Link href="/resources" className="hover:text-[#E7493F] transition-colors">Resources</Link>
+        <Link href="/contact" className="hover:text-[#E7493F] transition-colors">Contact</Link>
+      </div>
+    </nav>
+  );
+};
+
+export default Header;
+
+// Updated interface for Post type to include categories
+// FILE: types/post.ts (you may have this in a different location)
+interface Post {
+  _id: string;
+  title: string;
+  description: string;
+  mainImage: any;
+  slug: {
+    current: string;
+  };
+  author: {
+    name: string;
+    image: any;
+  };
+  categories?: string[];
+  _createdAt: string;
+  _publishedAt: string;
+  comments: Comment[];
+}
+
+interface Comment {
+  _id: string;
+  name: string;
+  email: string;
+  comment: string;
+  _createdAt: string;
+}

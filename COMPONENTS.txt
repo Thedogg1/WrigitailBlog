@@ -1,0 +1,939 @@
+
+PAGE.TSX
+
+import React from 'react';
+import { client } from '@/sanity/lib/client';
+import { groq } from 'next-sanity';
+import Image from 'next/image';
+import { urlForImage } from '@/sanity/lib/image';
+import Route from '@/components/Route';
+
+const query = groq`
+    *[_type =="post"]{
+    ...,
+      author->, 
+} | order(_publishedAt desc)`;
+
+const page = async () => {
+  const posts = await client.fetch(query);
+
+  return (
+    <div className='md:mx-14 my-5'>
+      <h2 className='text-2xl mt-2 mb-5 border-b-2 border-b-gray-400 pb-3 fontsemibold mx-4'>
+        Recent travel blog posts
+      </h2>
+      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 px-5 gap-5 pb-  10'>
+        {posts.map((post: Post) => (
+          <Route route={`/blog/${post.slug.current}`}>
+            <div key={post._id} className='border border-gray-200 rounded mb-3'>
+              <div className='relative w-full h-80 drop-shadow-xl'>
+                <Image
+                  fill
+                  src={urlForImage(post.mainImage)}
+                  alt='postImage'
+                  className='object-cover object-left lg:object-center'
+                />
+              </div>
+              <div className='mx-5 pb-4' key={post.title}>
+                <h1 className='mt-5 mb-2 font-semibold text-[#E7493F]'>
+                  {post.title}
+                </h1>
+                <p className='line-clamp-6'>{post.description}</p>
+              </div>
+            </div>
+          </Route>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default page;
+
+
+
+
+
+
+MAIN.TSX
+
+import React from 'react';
+import RightContents from './rightcontents/RightContents';
+import LeftContents from './leftcontents/LeftContents';
+
+type Props = {
+  posts: Post[];
+};
+
+//passes the data as a prop to LeftContents
+const Main = ({ posts }: Props) => {
+  return (
+    <div className='md:flex md:flex-row-reverse w-[95vw] mx-auto'>
+      <div className='md:basis-[40%]'>
+        <RightContents posts={posts} />
+      </div>
+      <div className='md:basis-[60%]'>
+        <LeftContents posts={posts} />
+      </div>
+    </div>
+  );
+};
+
+export default Main;
+
+HERO.TSX
+import React from 'react';
+import BgImg from '../public/assets/background.jpg';
+import Image from 'next/image';
+
+const Hero = () => {
+  return (
+    <div className='relative w-full h-[60vh] md:h-[75vh]'>
+      <div className='absolute inset-0 -z-10 bg-slate-700'>
+        <Image
+          src={BgImg}
+          alt='bgImg'
+          fill
+          className='object-cover object-center brightness-50'
+        />
+      </div>
+
+      <div className='flex justify-end h-[66%] items-center'>
+        {/* Nothing will be here, just for proper alignment*/}
+        <div className='flex flex-col mt-10 w-[50vw]'>
+          <h1 className='text-white text-[30px] md:text-[50px] font-semibold'>
+            We Take Care
+          </h1>
+          <h1 className='text-white text-[30px] md:text-[50px] font-semibold text-center'>
+            Of Your Trip
+          </h1>
+          <div className='flex justify-center pt-5 md:pt-10'>
+            <button
+              className='text-white bg-gradient-to-r from-transparent to-[#E7493F]
+            w-34 md:w-48 text-[13px] md:text-base hover:bg-[#E7493F] font-semibold py-2 px-4 border
+            border-white hover:border-transparent'
+            >
+              EXPLORE NOW
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Hero;
+
+
+RIGHTCONTENTS
+
+import React from 'react';
+import TravelCard from './TravelCard';
+import InstaCard from './InstaCard';
+import Recommended from './Recommended';
+
+type Props = {
+  posts: Post[];
+};
+const RightContents = ({ posts }: Props) => {
+  return (
+    <div className='-mt-12 z-10'>
+      <TravelCard />
+      <InstaCard />
+      <Recommended posts={posts} />
+    </div>
+  );
+};
+
+export default RightContents;
+
+
+LEFTCONTENTS
+import React from 'react';
+import Explore from './Explore';
+import About from './About';
+import Featured from './Featured';
+import Bloglist from './BlogList';
+
+type Props = {
+  posts: Post[];
+};
+//passes the property to featured
+const LeftContents = ({ posts }: Props) => {
+  return (
+    <div className='my-10'>
+      <Explore />
+      <About />
+      <Featured posts={posts} />
+      <div className='text-center'>
+        <p className="font-extrabold font-sans text-5xl text-center mb-10 mr-2 bg-[url('../public/assets/bgimg.jpg')] bg-clip-text text-transparent">
+          FOLLOW YOUR DREAMS
+        </p>
+      </div>
+      <Bloglist posts={posts} />
+    </div>
+  );
+};
+
+export default LeftContents;
+
+HEADER
+
+import React from 'react';
+import Logo from '../public/assets/m.png';
+import Image from 'next/image';
+import Link from 'next/link';
+
+const Header = () => {
+  return (
+    <nav
+      className='flex justify-between bg-[#1C252A] text-white py-3 md:py-5 px-5 md:px-10 lg:px-20 font-semibold
+    text-[12px] md:text-[14px] lg:text-16px items-center'
+    >
+      <Link href='/blog' className='flex items-center'>
+        <span>
+          <Image src={Logo} alt='Logo' className='h-8 w-8 mx-2' />
+        </span>
+        <span className='hidden md:inline-block'>my travel blog</span>
+      </Link>
+    </nav>
+  );
+};
+
+export default Header;
+
+
+FOOTER
+
+/* eslint-disable */
+
+import React from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import FooterImg from '../public/assets/footer.jpg';
+
+const Footer = () => {
+  return (
+    <div className='mt-14 text-white text-[14px]'>
+      <div className='relative w-full bg-cover bg-center bg-no-repeat py-10'>
+        {/* inset-0 fills the entire parent element */}
+        <div className='absolute inset-0 -z-10'>
+          <Image
+            src={FooterImg}
+            fill
+            alt='footer image'
+            className='object-cover object-center brightness-50'
+          />
+        </div>
+        {/* container div for all */}
+        <div className='flex justify-around items-center h-full'>
+          {/* container div for left contents */}
+          <div className='flex flex-col gap-y-10'>
+            <div className='flex divide-x'>
+              <div className='w-36'>
+                <h3 className='font-semibold mb-3'>EXPLORE</h3>
+                <p>Journey</p>
+                <p>Places</p>
+                <p>Channel</p>
+                <p>Editor's Pick</p>
+              </div>
+              <div className='pl-10'>
+                <h3 className='font-semibold mb-3'>EXPLORE</h3>
+                <p>Journey</p>
+                <p>Places</p>
+                <p>Channel</p>
+                <p>Editor's Pick</p>
+              </div>
+            </div>
+            <div className='flex divide-x'>
+              <div className='w-36'>
+                <h3 className='font-semibold mb-3'>EXPLORE</h3>
+                <p>Journey</p>
+                <p>Places</p>
+                <p>Channel</p>
+                <p>Editor's Pick</p>
+              </div>
+              <div className='pl-10'>
+                <h3 className='font-semibold mb-3'>EXPLORE</h3>
+                <p>Journey</p>
+                <p>Places</p>
+                <p>Channel</p>
+                <p>Editor's Pick</p>
+              </div>
+            </div>
+            <div>
+              <p>
+                {' '}
+                Developed by{' Terry Martin '}
+                <Link
+                  href='https://twitter.com/userName'
+                  target='_blank'
+                  className='underline'
+                ></Link>
+              </p>
+            </div>
+          </div>
+
+          {/* container div for right contents */}
+          <div className='flex flex-col gap-y-10'>
+            <div className='flex divide-x'>
+              <div className='w-36'>
+                <h3 className=' font-semibold mb-3'> MORE TRAVEL</h3>
+                <p>The Travel Mob</p>
+                <p>The Green Life</p>
+                <p>Travel Websites</p>
+                <p>Top UK Travellers</p>
+              </div>
+              <div className='pl-10'>
+                <h3 className='=font-semibold mb-3'>COMMUNITIES</h3>
+                <p>Contributors</p>
+                <p>Members</p>
+                <p>True North</p>
+                <p>Weather Sites</p>
+              </div>
+            </div>
+            <div>
+              {/* for subscribe to newsletter */}
+              <div>
+                <h3 className='font-semibold mb-3 text-center'>
+                  SUBSCRIBE TO OUR NEWSLETTER
+                </h3>
+                <div className='flex flex-row'>
+                  <div className='relative mb-6'>
+                    <div className='absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none'>
+                      <svg
+                        className='w-4 h-4 text-gray-50 dark:text-gray-50'
+                        aria-hidden='true'
+                        xmlns='http://www.w3.org/2000/svg'
+                        fill='currentColor'
+                        viewBox='0 0 20 16'
+                      >
+                        <path
+                          d='m10.036 8.278 9.258-7.79A1.979 1.979 0 0 0 18 
+                       0H2A1.987 1.987 0 0 0 .641.541l9.395 7.737Z'
+                        />
+                        <path
+                          d='M11.241 9.817c-.36.275-.801.425-1.255.427-.428
+                       0-.845-.138-1.187-.395L0 2.6V14a2 
+                       2 0 0 0 2 2h16a2 2 0 0 0 2-2V2.5l-8.759 7.317Z'
+                        />
+                      </svg>
+                    </div>
+                    <label>
+                      <input
+                        type='text'
+                        id='input-group-1'
+                        className='bg-transparent border border-gray-300
+                    text-gray-50  text-sm rounded-lg block w-full ps-10 p-2.5'
+                        placeholder='zgbo@gmail.com'
+                      />
+                    </label>
+                  </div>
+
+                  <button
+                    type='submit'
+                    className='text-black
+                 bg-gray-50 hover:bg-gray-100 focus:ring-1 
+                  focus:outline-none focus:ring-gray-100 font-medium rounded-md 
+                  text-sm sm:w-auto px-5  py-1 text-center h-10 ml-2'
+                  >
+                    Submit
+                  </button>
+                </div>
+              </div>
+              {/* for follow us */}
+              <h3 className='font-semibold mb-3 text-center'>FOLLOW US</h3>
+              <div className=' flex items-center gap-6 justify-center'>
+                <a href='#!' role='button'>
+                  {/* Facebook */}
+                  <span className='[&>svg]:h-7 [&>svg]:w-7 [&>svg]:fill-[#1877f2]'>
+                    <svg
+                      xmlns='http://www.w3.org/2000/svg'
+                      viewBox='0 0 320 512'
+                    >
+                      {/* <!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc. --> */}
+                      <path d='M80 299.3V512H196V299.3h86.5l18-97.8H196V166.9c0-51.7 20.3-71.5 72.7-71.5c16.3 0 29.4 .4 37 1.2V7.9C291.4 4 256.4 0 236.2 0C129.3 0 80 50.5 80 159.4v42.1H14v97.8H80z' />
+                    </svg>
+                  </span>
+                </a>
+
+                <a href='#!' role='button'>
+                  {/* <!-- Instagram --> */}
+                  <span className='[&>svg]:h-7 [&>svg]:w-7 [&>svg]:fill-[#c13584]'>
+                    <svg
+                      xmlns='http://www.w3.org/2000/svg'
+                      viewBox='0 0 448 512'
+                    >
+                      {/* <!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc. --> */}
+                      <path d='M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z' />
+                    </svg>
+                  </span>
+                </a>
+
+                <a href='#!' role='button'>
+                  {/* <!-- Google --> */}
+                  <span className='[&>svg]:h-7 [&>svg]:w-7 [&>svg]:fill-[#ea4335]'>
+                    <svg
+                      xmlns='http://www.w3.org/2000/svg'
+                      viewBox='0 0 488 512'
+                    >
+                      {/* <!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc. --> */}
+                      <path d='M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z' />
+                    </svg>
+                  </span>
+                </a>
+
+                <a href='#!' role='button'>
+                  <span className='[&>svg]:h-7 [&>svg]:w-7 [&>svg]:fill-white'>
+                    <svg
+                      xmlns='http://www.w3.org/2000/svg'
+                      fill='currentColor'
+                      viewBox='0 0 512 512'
+                    >
+                      {/* Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc. */}
+                      <path d='M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z' />
+                    </svg>
+                  </span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Footer;
+
+FOOTER MOBILE
+/* eslint-disable */
+import React from 'react';
+import Image from 'next/image';
+import FooterImg from '../public/assets/footer.jpg';
+
+const FooterMobile = () => {
+  return (
+    <div className='mt-10 text-white text-center'>
+      <div className='relative py-10 w-full bg-cover bg-center bg-no-repeat'>
+        <div className='absolute inset-0 -z-10'>
+          <Image
+            src={FooterImg}
+            fill
+            alt='footer image'
+            className='object-cover object-center brightness-50'
+          ></Image>
+        </div>
+        <div className='divide-y-2 mx-10'>
+          <div className='pb-5'>
+            <h2 className='font-semibold pb-3'>EXPLORE</h2>
+            <p>Journeys</p>
+            <p>Places</p>
+            <p>Channels</p>
+            <p>Editor's Pick</p>
+          </div>
+
+          <h2 className='font-semibold py-5'>NAVIGATE</h2>
+          <h2 className='font-semibold py-5'>TOP CITIES</h2>
+          <h2 className='font-semibold py-5'>CITY BREAKS</h2>
+          <h2 className='font-semibold py-5'>MORE TRAVEL</h2>
+          <h2 className='font-semibold py-5'>COMMUNITY</h2>
+
+          {/* for subscribe to newsletter */}
+          <div className='pt-7 pb-7'>
+            <h3 className='font-semibold mb-3 text-center'>
+              SUBSCRIBE TO OUR NEWSLETTER
+            </h3>
+            <div className='flex flex-row mb-6'>
+              <div className='relative mb-6'></div>
+              <div className='absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none'>
+                <svg
+                  className='w-4 h-4 text-gray-50 dark:text-gray-50'
+                  aria-hidden='true'
+                  xmlns='http://www.w3.org/2000/svg'
+                  fill='currentColor'
+                  viewBox='0 0 20 16'
+                >
+                  <path
+                    d='m10.036 8.278 9.258-7.79A1.979 1.979 0 0 0 18 
+                       0H2A1.987 1.987 0 0 0 .641.541l9.395 7.737Z'
+                  />
+                  <path
+                    d='M11.241 9.817c-.36.275-.801.425-1.255.427-.428
+                       0-.845-.138-1.187-.395L0 2.6V14a2 
+                       2 0 0 0 2 2h16a2 2 0 0 0 2-2V2.5l-8.759 7.317Z'
+                  />
+                </svg>
+              </div>
+              <label>
+                <input
+                  type='text'
+                  id='input-group-2'
+                  className='bg-transparent border border-gray-300
+                    text-gray-50  text-sm rounded-lg block w-full ps-10 p-2.5'
+                  placeholder='zgbo@gmail.com'
+                />
+              </label>
+              <label>
+                <button
+                  type='submit'
+                  className='text-black
+                 bg-gray-50 hover:bg-gray-100 focus:ring-1 
+                  focus:outline-none focus:ring-gray-100 font-medium rounded-md 
+                  text-sm sm:w-auto px-5  py-1 text-center h-10 ml-2'
+                >
+                  Submit
+                </button>
+              </label>
+            </div>
+          </div>
+          <div className='py-5'>
+            <h3 className='font-semibold mb-3 text-center'>FOLLOW US</h3>
+            <div className=' flex items-center gap-6 justify-center'>
+              <a href='#!' role='button'>
+                {/* Facebook */}
+                <span className='[&>svg]:h-7 [&>svg]:w-7 [&>svg]:fill-[#1877f2]'>
+                  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 512'>
+                    {/* <!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc. --> */}
+                    <path d='M80 299.3V512H196V299.3h86.5l18-97.8H196V166.9c0-51.7 20.3-71.5 72.7-71.5c16.3 0 29.4 .4 37 1.2V7.9C291.4 4 256.4 0 236.2 0C129.3 0 80 50.5 80 159.4v42.1H14v97.8H80z' />
+                  </svg>
+                </span>
+              </a>
+
+              <a href='#!' role='button'>
+                {/* <!-- Instagram --> */}
+                <span className='[&>svg]:h-7 [&>svg]:w-7 [&>svg]:fill-[#c13584]'>
+                  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'>
+                    {/* <!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc. --> */}
+                    <path d='M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9S339 319.5 339 255.9 287.7 141 224.1 141zm0 189.6c-41.1 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.6 74.7-74.7 74.7zm146.4-194.3c0 14.9-12 26.8-26.8 26.8-14.9 0-26.8-12-26.8-26.8s12-26.8 26.8-26.8 26.8 12 26.8 26.8zm76.1 27.2c-1.7-35.9-9.9-67.7-36.2-93.9-26.2-26.2-58-34.4-93.9-36.2-37-2.1-147.9-2.1-184.9 0-35.8 1.7-67.6 9.9-93.9 36.1s-34.4 58-36.2 93.9c-2.1 37-2.1 147.9 0 184.9 1.7 35.9 9.9 67.7 36.2 93.9s58 34.4 93.9 36.2c37 2.1 147.9 2.1 184.9 0 35.9-1.7 67.7-9.9 93.9-36.2 26.2-26.2 34.4-58 36.2-93.9 2.1-37 2.1-147.8 0-184.8zM398.8 388c-7.8 19.6-22.9 34.7-42.6 42.6-29.5 11.7-99.5 9-132.1 9s-102.7 2.6-132.1-9c-19.6-7.8-34.7-22.9-42.6-42.6-11.7-29.5-9-99.5-9-132.1s-2.6-102.7 9-132.1c7.8-19.6 22.9-34.7 42.6-42.6 29.5-11.7 99.5-9 132.1-9s102.7-2.6 132.1 9c19.6 7.8 34.7 22.9 42.6 42.6 11.7 29.5 9 99.5 9 132.1s2.7 102.7-9 132.1z' />
+                  </svg>
+                </span>
+              </a>
+
+              <a href='#!' role='button'>
+                {/* <!-- Google --> */}
+                <span className='[&>svg]:h-7 [&>svg]:w-7 [&>svg]:fill-[#ea4335]'>
+                  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 488 512'>
+                    {/* <!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc. --> */}
+                    <path d='M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z' />
+                  </svg>
+                </span>
+              </a>
+
+              <a href='#!' role='button'>
+                <span className='[&>svg]:h-7 [&>svg]:w-7 [&>svg]:fill-white'>
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    fill='currentColor'
+                    viewBox='0 0 512 512'
+                  >
+                    {/* Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc. */}
+                    <path d='M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z' />
+                  </svg>
+                </span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default FooterMobile;
+
+MOREBLOGS
+/* eslint-disable */
+import React from 'react';
+import Image from 'next/image';
+import Route from './Route';
+import { urlForImage } from '@/sanity/lib/image';
+
+type Props = {
+  posts: Post[];
+  post: Post;
+};
+
+const MoreBlogs = ({ posts, post }: Props) => {
+  const ModifiedPosts = posts
+    .slice(0, 3)
+    .filter((item) => item.title !== post.title);
+  return (
+    <div className='md:mx-14 my-10'>
+      <h2 className='text-2xl mt-5 mb-3 px-5 font-semibold'>Read More Posts</h2>
+      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 px-5 gap-5 pb-10'>
+        {ModifiedPosts.map((post, i) => (
+          <Route route={`/blog/${post.slug.current}`}>
+            <div
+              className='border border-gray-600 rounded mb-3 md:basis-[40%]'
+              key={post._id}
+            >
+              <div className='relative w-full h-80'>
+                <Image
+                  fill
+                  src={urlForImage(post.mainImage)}
+                  alt='postImage'
+                  className='object-cover object-left lg:object-center'
+                />
+              </div>
+              <div className='mx-5 pb-4'>
+                <h2 className='mt-5 mb-2 font-semibold text-[#dc2626]'>
+                  {post.title}
+                </h2>
+                <p className='line-clamp-6'>{post.description}</p>
+              </div>
+            </div>
+          </Route>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default MoreBlogs;
+
+
+RICHTEXT
+import Image from 'next/image';
+import Link from 'next/link';
+import { urlForImage } from '@/sanity/lib/image';
+
+export const RichText = {
+  types: {
+    image: ({ value }: any) => {
+      return (
+        <div className='relative w-full h-96 m-5 mx-auto'>
+          <Image
+            className='object-contain'
+            src={urlForImage(value)}
+            alt='Blog Post Image'
+            fill
+          />
+        </div>
+      );
+    },
+  },
+  list: {
+    bullet: ({ children }: any) => (
+      <ul className='ml-10 py-3 list-disc space-y-2 font-normal leading-8 trackingwide '>
+        {children}
+      </ul>
+    ),
+    number: ({ children }: any) => (
+      <ol
+        className='mt-lg list-decimal font-normal leading-8 tracking-wide
+                 '
+      >
+        {children}
+      </ol>
+    ),
+  },
+  block: {
+    h1: ({ children }: any) => (
+      <h1 className='text-5xl py-5 font-bold'>{children}</h1>
+    ),
+    h2: ({ children }: any) => (
+      <h2 className='text-4xl py-3 font-bold'>{children}</h2>
+    ),
+    h3: ({ children }: any) => (
+      <h3 className='text-3xl py-2 font-bold'>{children}</h3>
+    ),
+    h4: ({ children }: any) => (
+      <h4 className='text-2xl font-bold'>{children}</h4>
+    ),
+    normal: ({ children }: any) => (
+      <div className=''>
+        {' '}
+        <p className='font-normal leading-8 tracking-wide py-4 '>{children}</p>
+      </div>
+    ),
+    blockquote: ({ children }: any) => (
+      <blockquote
+        className='border-l-gray-700 border-l-4 pl-5 py-5 my-5 font-normal
+           leading-8 tracking-wide '
+      >
+        {children}{' '}
+      </blockquote>
+    ),
+  },
+  marks: {
+    link: ({ children, value }: any) => {
+      const rel = !value.href.startsWith('/')
+        ? 'noopener noreferrer'
+        : undefined;
+
+      return (
+        <Link
+          href={value.href}
+          rel={rel}
+          className='underline text-[#E7493F] hover:text-white'
+        >
+          {children}
+        </Link>
+      );
+    },
+  },
+};
+
+COMMENTS
+'use client';
+
+import React from 'react';
+import { useForm, SubmitHandler } from 'react-hook-form';
+import toast from 'react-hot-toast';
+
+type Input = {
+  _id: string;
+  name: string;
+  email: string;
+  comment: string;
+};
+
+type Props = {
+  post: Post;
+};
+
+const Comments = ({ post }: Props) => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<Input>();
+
+  // Handles the form submit
+  const onSubmit: SubmitHandler<Input> = (data) => {
+    fetch('/api/createComment', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    })
+      .then(() => {
+        toast.success(
+          'Your comment has been submitted and is awaiting approval'
+        );
+      })
+      .catch((error: any) => {
+        toast.error(error.message);
+        return;
+      });
+  };
+
+  return (
+    <div>
+      <div>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className='flex flex-col p-5 my-10 max-w-2xl mx-auto mb-10'
+        >
+          <h3 className='text-base text-[#E7493F]'>Enjoyed This Article?</h3>
+          <h3 className='text-3xl- font-bold'>Leave a Comment</h3>
+          <hr className='py-3 mt-2'></hr>
+          <div className='block mb-5'>
+            <label htmlFor='commentName'>Name</label>
+            <input
+              id='commentName'
+              {...register('name', { required: true })}
+              className='shadow border border-b-gray-200 bg-transparent rounded py-2 px-3  mt-1 block w-full'
+              placeholder='John Doe'
+              type='text'
+              autoComplete='off'
+            />
+          </div>
+          <div className='block mb-5'>
+            <label htmlFor='emailField'>Email</label>
+            <input
+              id='emailField'
+              {...register('email', { required: true })}
+              className='shadow border border-b-gray-200 bg-transparent rounded py-2 px-3  mt-1 block w-full'
+              placeholder='johndoe@gmail.com'
+              type='email'
+              autoComplete='off'
+            />
+          </div>
+          <div className='block mb-5'>
+            <label htmlFor='commentField'>Comment</label>
+            <textarea
+              id='commentField'
+              {...register('comment', { required: true })}
+              className='shadow border border-b-gray-200 bg-transparent rounded py-2 px-3  mt-1 block w-full'
+              placeholder='Your comment...'
+              rows={8}
+            />
+          </div>
+          <div className='flex flex-col'>
+            {errors.name && (
+              <span className='text-red-500'>The Name Field Is Required</span>
+            )}
+            {errors.email && (
+              <span className='text-red-500'>The Email Field Is Required</span>
+            )}
+            {errors.comment && (
+              <span className='text-red-500'>
+                The Comments Field Is Required
+              </span>
+            )}
+          </div>
+
+          <input
+            id='commentID'
+            {...register('_id')}
+            type='hidden'
+            name='_id'
+            value={post._id}
+          />
+
+          <label>
+            <input
+              type='submit'
+              id='btnSubmit'
+              className='shadow bg-[#e74a3fab] hover:bg-[#E7493F] focus:shadow-outline 
+          focus:outline-none text-white font-bold py-2 px-4 rounded cursor-pointer'
+            />
+          </label>
+        </form>
+        {/* For Displaying Comments */}
+        <div className='flex flex-col p-10 my-10 max-w-2xl mx-auto shadow-[#E7493F]  shadow space-y-2'>
+          <h1 className='text-4xl'>Comments</h1>
+          <hr className='pb-2' />
+
+          {post.comments.length < 1 ? (
+            <p>Be the first to comment </p>
+          ) : (
+            <div className='divide-y'>
+              {post.comments.map((comment: any) => (
+                <div key={comment._id} className='p-5'>
+                  <p className='text-[#E7493F] text-base font-bold'>
+                    {comment.name}
+                  </p>
+                  <p className='text-gray-500 text-[12px]'>
+                    {new Date(comment._createdAt).toLocaleDateString('en-GB', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                    })}
+                  </p>
+                  <p className='mt-3'>{comment.comment}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Comments;
+
+ROUTE
+import React from 'react';
+import Link from 'next/link';
+
+const Route = ({
+  children,
+  route,
+}: {
+  children: React.ReactNode;
+  route: string;
+}) => {
+  return <Link href={route}>{children}</Link>;
+};
+
+export default Route;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,38 +1,18 @@
 import React from 'react';
-import BgImg from '../public/assets/background.jpg';
-import Image from 'next/image';
 
 const Hero = () => {
   return (
-    <div className='relative w-full h-[60vh] md:h-[75vh]'>
-      <div className='absolute inset-0 -z-10'>
-        <Image
-          src={BgImg}
-          alt='bgImg'
-          fill
-          className='object-cover object-center brightness-50'
-        />
-      </div>
-
-      <div className='flex justify-end h-[66%] items-center'>
-        {/* Nothing will be here, just for proper alignment*/}
-        <div className='flex flex-col mt-10 w-[50vw]'>
-          <h1 className='text-white text-[30px] md:text-[50px] font-semibold'>
-            We Take Care
-          </h1>
-          <h1 className='text-white text-[30px] md:text-[50px] font-semibold text-center'>
-            Of Your Trip
-          </h1>
-          <div className='flex justify-center pt-5 md:pt-10'>
-            <button
-              className='text-white bg-gradient-to-r from-transparent to-[#E7493F]
-            w-34 md:w-48 text-[13px] md:text-base hover:bg-[#E7493F] font-semibold py-2 px-4 border
-            border-white hover:border-transparent'
-            >
-              EXPLORE NOW
-            </button>
-          </div>
-        </div>
+    <div className='bg-[#1B3143] text-white py-16 px-8'>
+      <div className='max-w-4xl mx-auto'>
+        <h1 className='text-4xl md:text-5xl font-bold mb-3'>
+          Empowering Financial Advisors with AI Insights
+        </h1>
+        <p className='text-lg mb-8'>
+          Navigating the intersection of technology and finance.
+        </p>
+        <button className='bg-white text-[#1B3143] px-5 py-2 rounded font-medium hover:bg-gray-100 transition-colors'>
+          Subscribe for Weekly Updates
+        </button>
       </div>
     </div>
   );

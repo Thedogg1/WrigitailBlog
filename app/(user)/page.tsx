@@ -1,27 +1,26 @@
-/* eslint-disable react/jsx-key */
 import React from 'react';
 import { client } from '@/sanity/lib/client';
 import { groq } from 'next-sanity';
-
 import Hero from '@/components/Hero';
-import Main from '@/components/Main';
+import FeaturedArticles from '@/components/FeaturedArticles';
+import About from '@/components/About';
 
 const query = groq`
-*[_type =="post"]{
-...,
-author ->,
-}`;
+    *[_type =="post"]{
+    ...,
+      author->, 
+} | order(_publishedAt desc)`;
 
-const page = async () => {
-  // pasees the data through a prop to main
+const HomePage = async () => {
   const posts = await client.fetch(query);
 
   return (
-    <div>
+    <main>
       <Hero />
-      <Main posts={posts} />
-    </div>
+      <FeaturedArticles posts={posts} />
+      <About />
+    </main>
   );
 };
 
-export default page;
+export default HomePage;
